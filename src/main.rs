@@ -1,7 +1,7 @@
 use std::{env, fs::File, io::{self, Write}};
 
 mod vec3;
-use vec3::{Vec3, Color};
+use vec3::Color;
 
 mod color;
 use color::write_color;
@@ -18,7 +18,7 @@ fn generate_ppm(width: u32, height: u32) -> String {
         print!("\rScanlines remanining: {}", j);
         io::stdout().flush().unwrap();
         for i in 0..width {
-            let c: Color = Vec3::new(
+            let c: Color = Color::new(
                 (i as f32 / (width as f32 - 1.0)) as f32,
                 (j as f32 / (height as f32 - 1.0)) as f32,
                 0.25
@@ -55,7 +55,7 @@ fn main() {
     let width = args[1].parse::<u32>().unwrap();
     let height = args[2].parse::<u32>().unwrap();
 
-    let file_contents = generate_ppm(height, width);
+    let file_contents = generate_ppm(width, height);
 
     write_ppm_file(out_file, file_contents)
 }
