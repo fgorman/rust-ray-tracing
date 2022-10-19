@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 use std::ops::{Neg, AddAssign, MulAssign, DivAssign, Add, Sub, Mul, Div};
+use std::fmt::Display;
 
 #[derive(Clone, Copy)]
 pub struct Vec3 {
@@ -32,10 +33,6 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn to_string(self) -> String {
-        format!("{} {} {}", self.e[0], self.e[1], self.e[2])
-    }
-
     pub fn dot(self, other: Vec3) -> f64 {
         self.e[0]*other.e[0] + self.e[1]+other.e[1] + self.e[2]*other.e[2]
     }
@@ -57,6 +54,12 @@ impl Vec3 {
 
 pub type Color = Vec3;
 pub type Point3 = Vec3;
+
+impl Display for Vec3 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} {} {}", self.e[0], self.e[1], self.e[2])
+    }
+}
 
 impl Neg for Vec3 {
     type Output = Self;
