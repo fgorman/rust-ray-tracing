@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crate::vec3::{Point3, Vec3, F64Multiplier};
 
 pub struct Ray {
@@ -8,6 +6,7 @@ pub struct Ray {
 }
 
 impl Ray {
+    #[allow(dead_code)]
     pub fn new_empty() -> Ray {
         Ray {
             orig: Point3::new_empty(),
@@ -30,6 +29,7 @@ impl Ray {
         self.dir
     }
 
+    #[allow(dead_code)]
     pub fn at(&self, t: f64) -> Point3 {
         self.orig + F64Multiplier(t)*self.dir
     }
