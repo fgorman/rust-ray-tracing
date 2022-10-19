@@ -48,7 +48,10 @@ fn generate_ppm(width: u32, aspect_ratio: f64) -> String {
 
     for j in (0..height).rev() {
         print!("\rScanlines remanining: {}", j);
-        io::stdout().flush().unwrap();
+        if let Err(e) = io::stdout().flush() {
+            panic!("Error with flushing stdout: {}", e);
+        }
+
         for i in 0..width {
             let u: f64 = i as f64 / (width - 1) as f64;
             let v: f64 = j as f64 / (height - 1) as f64;
@@ -83,9 +86,18 @@ fn main() {
     }
 
     let out_file = args.remove(1);
-    let width = args[1].parse::<u32>().unwrap();
-    let ar_num: f64 = args[2].parse::<f64>().unwrap();
-    let ar_denom: f64 = args[3].parse::<f64>().unwrap();
+    let width = match args[1].parse::<u32>() {
+        Err(e) => panic!("Error parsing width: {}", e),
+        Ok(val) => val
+    };
+    let ar_num: f64 = match args[2].parse::<f64>() {
+        Err(e) => panic!("Error parsing ar_num: {}", e),
+        Ok(val) => val
+    };
+    let ar_denom: f64 = match args[3].parse::<f64>() {
+        Err(e) => panic!("Error parsing ar_denom: {}", e),
+        Ok(val) => val
+    };
     let aspect_ratio = ar_num / ar_denom;
 
     let file_contents = generate_ppm(width, aspect_ratio);
