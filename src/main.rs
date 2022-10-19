@@ -12,7 +12,19 @@ use ray::Ray;
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const FOCAL_LENGTH: f64 = 1.0;
 
+fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> bool {
+    let oc: Vec3 = r.origin() - center;
+    let a: f64 = r.direction().dot(r.direction());
+    let b: f64 = 2.0 * oc.dot(r.direction());
+    let c: f64 = oc.dot(oc) - radius*radius;
+    let discriminant: f64 = b*b - 4.0*a*c;
+    discriminant > 0.0
+}
+
 fn ray_color(ray: Ray) -> Color {
+    if hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &ray) {
+        return Color::new(1.0, 0.0, 0.0);
+    }
     let unit_vector: Vec3 = ray.direction().unit_vector();
     let t: f64 = 0.5*(unit_vector.y() + 1.0);
     F64Multiplier(1.0-t)*Color::new(1.0, 1.0, 1.0) + F64Multiplier(t)*Color::new(0.5, 0.7, 1.0)
