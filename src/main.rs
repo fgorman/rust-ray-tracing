@@ -3,6 +3,7 @@ use std::{env, fs::File, io::{self, Write}};
 mod vec3;
 mod color;
 mod ray;
+mod hittables;
 
 use vec3::{Color, Vec3, Point3, F64Multiplier};
 use color::write_color;
