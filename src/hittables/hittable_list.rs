@@ -4,12 +4,11 @@ use crate::ray::Ray;
 
 use super::hittable::{Hittable, HitRecord};
 
-struct HittableList {
+pub struct HittableList {
     pub objects: Vec<Rc<dyn Hittable>>,
 }
 
 impl HittableList {
-    #[allow(dead_code)]
     pub fn new_empty() -> Self {
         Self {
             objects: Vec::new()
@@ -28,7 +27,6 @@ impl HittableList {
         self.objects.clear();
     }
 
-    #[allow(dead_code)]
     pub fn add(&mut self, object: Rc<dyn Hittable>) {
         self.objects.push(object);
     }

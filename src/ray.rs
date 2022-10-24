@@ -29,7 +29,6 @@ impl Ray {
         self.dir
     }
 
-    #[allow(dead_code)]
     pub fn at(&self, t: f64) -> Point3 {
         self.orig + F64Multiplier(t)*self.dir
     }

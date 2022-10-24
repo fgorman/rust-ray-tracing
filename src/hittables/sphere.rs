@@ -17,7 +17,6 @@ impl Sphere {
         }
     }
 
-    #[allow(dead_code)]
     pub fn new(center: Point3, radius: f64) -> Self {
         Self {
             center,
