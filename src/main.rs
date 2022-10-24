@@ -5,6 +5,7 @@ mod color;
 mod ray;
 mod hittables;
 mod utils;
+mod camera;
 
 use vec3::{Color, Vec3, Point3, F64Multiplier};
 use color::write_color;
