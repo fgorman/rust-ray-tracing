@@ -11,3 +11,7 @@ pub fn random_double_from_range(start: f64, end: f64) -> f64 {
     let mut rng = rand::thread_rng();
     between.sample(&mut rng)
 }
+
+pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
+    if x < min { min } else if x > max { max } else { x }
+}
