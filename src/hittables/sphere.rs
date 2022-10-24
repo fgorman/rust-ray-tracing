@@ -1,4 +1,4 @@
-use crate::hittables::hittable::{HitRecord, Hittable};
+use super::hittable::{HitRecord, Hittable};
 use crate::vec3::{Vec3, Point3};
 use crate::ray::Ray;
 
@@ -27,7 +27,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit (self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
+    fn hit (&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool {
         let oc: Vec3 = r.origin() - self.center;
         let a: f64 = r.direction().length_squared();
         let half_b: f64 = oc.dot(r.direction());
@@ -54,6 +54,6 @@ impl Hittable for Sphere {
         let outward_normal: Vec3 = (rec.p - self.center) / self.radius;
         rec.set_face_normal(r, outward_normal);
 
-        return true;
+        true
     }
 }
