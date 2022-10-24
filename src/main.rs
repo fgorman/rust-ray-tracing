@@ -1,4 +1,4 @@
-use std::{env, fs::File, io::{self, Write}};
+use std::{env, fs::File, io::{self, Write}, rc::Rc};
 
 mod vec3;
 mod color;
@@ -10,36 +10,31 @@ mod camera;
 use vec3::{Color, Vec3, Point3, F64Multiplier};
 use color::write_color;
 use ray::Ray;
+use hittables::{hittable_list::HittableList, hittable::{Hittable, HitRecord}, sphere::Sphere};
 
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const FOCAL_LENGTH: f64 = 1.0;
 
-fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
-    let oc: Vec3 = r.origin() - center;
-    let a: f64 = r.direction().length_squared();
-    let half_b: f64 = oc.dot(r.direction());
-    let c: f64 = oc.length_squared() - radius*radius;
-    let discriminant: f64 = half_b*half_b - a*c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
+fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+    let mut rec: HitRecord = HitRecord::new_empty();
+    if world.hit(ray, 0.0, f64::INFINITY, &mut rec) {
+        return F64Multiplier(0.5) * (rec.normal + Color::new(1.0, 1.0, 1.0));
     }
-}
-
-fn ray_color(ray: Ray) -> Color {
-    let mut t: f64 =  hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, &ray);
-    if t > 0.0 {
-        let n: Vec3 = (ray.at(t)-Vec3::new(0.0, 0.0, -1.0)).unit_vector();
-        return F64Multiplier(0.5) * Color::new(n.x()+1.0, n.y()+1.0, n.z()+1.0);
-    }
-    let unit_vector: Vec3 = ray.direction().unit_vector();
-    t = 0.5*(unit_vector.y() + 1.0);
-    F64Multiplier(1.0-t)*Color::new(1.0, 1.0, 1.0) + F64Multiplier(t)*Color::new(0.5, 0.7, 1.0)
+    let unit_direction: Vec3 = ray.direction().unit_vector();
+    let t: f64 = 0.5 * (unit_direction.y() + 1.0);
+    F64Multiplier(1.0-t)*Color::new(1.0, 1.0, 1.0) + F64Multiplier(t) * Color::new(0.5, 0.7, 1.0)
 }
 
 fn generate_ppm(width: u32, aspect_ratio: f64) -> String {
+    // Image
     let height: u32 = (width as f64 / aspect_ratio) as u32;
+
+    // World
+    let mut world: HittableList = HittableList::new_empty();
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
+
+    // Camera
     let viewport_width: f64 = aspect_ratio * VIEWPORT_HEIGHT;
 
     let origin: Point3 = Point3::new_empty();
@@ -64,7 +59,7 @@ fn generate_ppm(width: u32, aspect_ratio: f64) -> String {
             let u: f64 = i as f64 / (width - 1) as f64;
             let v: f64 = j as f64 / (height - 1) as f64;
             let r: Ray = Ray::new(origin, lower_left_corner + F64Multiplier(u)*horizontal + F64Multiplier(v)*vertical - origin);
-            let c: Color = ray_color(r);
+            let c: Color = ray_color(&r, &world);
             file_contents += &write_color(c)
         }
     }
