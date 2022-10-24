@@ -11,7 +11,10 @@ use vec3::{Color, Vec3, Point3, F64Multiplier};
 use color::write_color;
 use ray::Ray;
 use hittables::{hittable_list::HittableList, hittable::{Hittable, HitRecord}, sphere::Sphere};
+use camera::Camera;
+use utils::random_double;
 
+const SAMPLES_PER_PIXEL: u32 = 100;
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const FOCAL_LENGTH: f64 = 1.0;
 
@@ -35,12 +38,7 @@ fn generate_ppm(width: u32, aspect_ratio: f64) -> String {
     world.add(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     // Camera
-    let viewport_width: f64 = aspect_ratio * VIEWPORT_HEIGHT;
-
-    let origin: Point3 = Point3::new_empty();
-    let horizontal: Vec3 = Vec3::new(viewport_width, 0.0, 0.0);
-    let vertical: Vec3 = Vec3::new(0.0, VIEWPORT_HEIGHT, 0.0);
-    let lower_left_corner: Vec3 = origin - horizontal/2.0 - vertical/2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
+    let cam: Camera = Camera::new(aspect_ratio, VIEWPORT_HEIGHT, FOCAL_LENGTH);
 
     let mut file_contents: String = String::new();
 
@@ -54,13 +52,15 @@ fn generate_ppm(width: u32, aspect_ratio: f64) -> String {
         if let Err(e) = io::stdout().flush() {
             panic!("Error with flushing stdout: {}", e);
         }
-
         for i in 0..width {
-            let u: f64 = i as f64 / (width - 1) as f64;
-            let v: f64 = j as f64 / (height - 1) as f64;
-            let r: Ray = Ray::new(origin, lower_left_corner + F64Multiplier(u)*horizontal + F64Multiplier(v)*vertical - origin);
-            let c: Color = ray_color(&r, &world);
-            file_contents += &write_color(c)
+            let mut pixel_color: Color = Color::new(0.0, 0.0, 0.0);
+            for _ in 0..SAMPLES_PER_PIXEL {
+                let u: f64 = (i as f64 + random_double()) / (width - 1) as f64;
+                let v: f64 = (j as f64 + random_double()) / (height - 1) as f64;
+                let r: Ray = cam.get_ray(u, v);
+                pixel_color += ray_color(&r, &world);
+            }
+            file_contents += &write_color(pixel_color, SAMPLES_PER_PIXEL);
         }
     }
 

@@ -6,6 +6,7 @@ pub fn random_double() -> f64 {
     between.sample(&mut rng)
 }
 
+#[allow(dead_code)]
 pub fn random_double_from_range(start: f64, end: f64) -> f64 {
     let between = Uniform::from(start..end);
     let mut rng = rand::thread_rng();

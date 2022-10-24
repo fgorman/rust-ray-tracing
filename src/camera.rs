@@ -1,11 +1,6 @@
 use crate::vec3::{Point3, Vec3, F64Multiplier};
 use crate::ray::Ray;
 
-const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const VIEWPORT_HEIGHT: f64 = 2.0;
-const VIEWPORT_WIDTH: f64 = ASPECT_RATIO * VIEWPORT_HEIGHT;
-const FOCAL_LENGTH: f64 = 1.0;
-
 pub struct Camera {
     origin: Point3,
     lower_left_corner: Point3,
@@ -14,11 +9,13 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Self {
+    pub fn new(aspect_ratio: f64, viewport_height: f64, focal_length: f64) -> Self {
+        let viewport_width: f64 = aspect_ratio * viewport_height;
+
         let origin: Point3 = Point3::new(0.0, 0.0, 0.0);
-        let horizontal: Vec3 = Vec3::new(VIEWPORT_HEIGHT, 0.0, 0.0);
-        let vertical: Vec3 = Vec3::new(0.0, VIEWPORT_WIDTH, 0.0);
-        let lower_left_corner: Point3 = origin - horizontal/2.0 - vertical/2.0 - Vec3::new(0.0, 0.0, FOCAL_LENGTH);
+        let horizontal: Vec3 = Vec3::new(viewport_width, 0.0, 0.0);
+        let vertical: Vec3 = Vec3::new(0.0, viewport_height, 0.0);
+        let lower_left_corner: Point3 = origin - horizontal/2.0 - vertical/2.0 - Vec3::new(0.0, 0.0, focal_length);
 
         Self {
             origin,
