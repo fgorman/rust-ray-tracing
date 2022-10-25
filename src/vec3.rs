@@ -193,11 +193,34 @@ impl Div<f64> for Vec3 {
     }
 }
 
+//////////////////////////////////////////////////////
+/// Diffuse Methods
+/// 
+/// Allow dead_code so we can swap in and out
+/// whenever we want
+/////////////////////////////////////////////////////
+
+#[allow(dead_code)]
 pub fn random_in_unit_sphere() -> Vec3 {
     loop {
         let p: Vec3 = Vec3::new_random_in_range(-1.0, 1.0);
         if p.length_squared() < 1.0 {
             return p;
         }
+    }
+}
+
+#[allow(dead_code)]
+pub fn random_unit_vector() -> Vec3 {
+    random_in_unit_sphere().unit_vector()
+}
+
+#[allow(dead_code)]
+pub fn random_in_hemisphere(normal: &Vec3) -> Vec3 {
+    let in_unit_sphere: Vec3 = random_in_unit_sphere();
+    if normal.dot(in_unit_sphere) > 0.0 {
+        in_unit_sphere
+    } else {
+        -in_unit_sphere
     }
 }
