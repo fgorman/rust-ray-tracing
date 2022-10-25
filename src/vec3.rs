@@ -1,6 +1,8 @@
 use std::ops::{Neg, AddAssign, MulAssign, DivAssign, Add, Sub, Mul, Div};
 use std::fmt::Display;
 
+use crate::utils::{random_double, random_double_from_range};
+
 #[derive(Clone, Copy)]
 pub struct Vec3 {
     e: [f64; 3],
@@ -16,6 +18,23 @@ impl Vec3 {
     pub fn new(e0: f64, e1: f64, e2: f64) -> Vec3 {
         Vec3 {
             e: [e0, e1, e2]
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn new_random() -> Self {
+        Self {
+            e: [random_double(), random_double(), random_double()]
+        }
+    }
+
+    pub fn new_random_in_range(min: f64, max: f64) -> Self {
+        Self {
+            e: [
+                random_double_from_range(min, max),
+                random_double_from_range(min, max),
+                random_double_from_range(min, max)
+            ]
         }
     }
 
@@ -171,5 +190,14 @@ impl Div<f64> for Vec3 {
 
     fn div(self, _rhs: f64) -> Self {
         F64Multiplier(1.0/_rhs) * self
+    }
+}
+
+pub fn random_in_unit_sphere() -> Vec3 {
+    loop {
+        let p: Vec3 = Vec3::new_random_in_range(-1.0, 1.0);
+        if p.length_squared() < 1.0 {
+            return p;
+        }
     }
 }

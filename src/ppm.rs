@@ -2,7 +2,7 @@ use std::{rc::Rc, io::{self, Write}, fs::File};
 
 use crate::{
     hittables::{hittable_list::HittableList, sphere::Sphere, hittable::{Hittable, HitRecord}},
-    vec3::{Point3, Vec3, F64Multiplier, Color},
+    vec3::{Point3, Vec3, F64Multiplier, Color, random_in_unit_sphere},
     ray::Ray,
     color::write_color,
     camera::Camera,
@@ -12,11 +12,18 @@ use crate::{
 const SAMPLES_PER_PIXEL: u32 = 100;
 const VIEWPORT_HEIGHT: f64 = 2.0;
 const FOCAL_LENGTH: f64 = 1.0;
+const MAX_DEPTH: u32 = 50;
 
-fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+fn ray_color(ray: &Ray, world: &dyn Hittable, depth: u32) -> Color {
     let mut rec: HitRecord = HitRecord::new_empty();
+
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
+    }
+
     if world.hit(ray, 0.0, f64::INFINITY, &mut rec) {
-        return F64Multiplier(0.5) * (rec.normal + Color::new(1.0, 1.0, 1.0));
+        let target: Point3 = rec.p + rec.normal + random_in_unit_sphere();
+        return F64Multiplier(0.5) * ray_color(&Ray::new(rec.p, target - rec.p), world, depth-1);
     }
     let unit_direction: Vec3 = ray.direction().unit_vector();
     let t: f64 = 0.5 * (unit_direction.y() + 1.0);
@@ -53,7 +60,7 @@ pub fn generate_ppm(width: u32, aspect_ratio: f64) -> String {
                 let u: f64 = (i as f64 + random_double()) / (width - 1) as f64;
                 let v: f64 = (j as f64 + random_double()) / (height - 1) as f64;
                 let r: Ray = cam.get_ray(u, v);
-                pixel_color += ray_color(&r, &world);
+                pixel_color += ray_color(&r, &world, MAX_DEPTH);
             }
             file_contents += &write_color(pixel_color, SAMPLES_PER_PIXEL);
         }
