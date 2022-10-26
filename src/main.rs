@@ -7,6 +7,7 @@ mod hittables;
 mod utils;
 mod camera;
 mod ppm;
+mod materials;
 
 use ppm::{generate_ppm, write_ppm_file};
 
