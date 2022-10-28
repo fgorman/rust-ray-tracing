@@ -1,5 +1,4 @@
-use std::env;
-
+mod arguments;
 mod vec3;
 mod color;
 mod ray;
@@ -9,32 +8,17 @@ mod camera;
 mod ppm;
 mod materials;
 
+use arguments::{Args, parse_command_line_args};
 use ppm::{generate_ppm, write_ppm_file};
 
 fn main() {
-    let mut args: Vec<String> = env::args().collect();
 
-    if args.len() < 5 {
-        panic!("Arguments must be: out_file_name width ar_num ar_denom");
-    }
+    let args: Args = parse_command_line_args();
+    
+    let aspect_ratio: f64 = args.numerator_ar / args.denominator_ar;
 
-    let out_file = args.remove(1);
-    let width = match args[1].parse::<u32>() {
-        Err(e) => panic!("Error parsing width: {}", e),
-        Ok(val) => val
-    };
-    let ar_num: f64 = match args[2].parse::<f64>() {
-        Err(e) => panic!("Error parsing ar_num: {}", e),
-        Ok(val) => val
-    };
-    let ar_denom: f64 = match args[3].parse::<f64>() {
-        Err(e) => panic!("Error parsing ar_denom: {}", e),
-        Ok(val) => val
-    };
-    let aspect_ratio = ar_num / ar_denom;
+    let file_contents = generate_ppm(args.image_width, aspect_ratio);
 
-    let file_contents = generate_ppm(width, aspect_ratio);
-
-    write_ppm_file(out_file, file_contents)
+    write_ppm_file(args.out_file, file_contents)
 }
 
