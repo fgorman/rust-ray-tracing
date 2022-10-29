@@ -5,20 +5,17 @@ mod ray;
 mod hittables;
 mod utils;
 mod camera;
-mod ppm;
 mod materials;
+mod render_image;
+mod rgb_wrapper;
 
 use arguments::{Args, parse_command_line_args};
-use ppm::{generate_ppm, write_ppm_file};
+use render_image::render_image;
 
 fn main() {
-
     let args: Args = parse_command_line_args();
     
     let aspect_ratio: f64 = args.numerator_ar / args.denominator_ar;
 
-    let file_contents = generate_ppm(args.image_width, aspect_ratio);
-
-    write_ppm_file(args.out_file, file_contents)
+    render_image(args.out_file, args.image_width, aspect_ratio)
 }
-

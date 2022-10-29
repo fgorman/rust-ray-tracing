@@ -38,8 +38,10 @@ impl Vec3 {
         }
     }
 
+    #[allow(dead_code)]
     pub fn x(self) -> f64 { self.e[0] }
     pub fn y(self) -> f64 { self.e[1] }
+    #[allow(dead_code)]
     pub fn z(self) -> f64 { self.e[2] }
 
     pub fn length_squared(self) -> f64 {
@@ -70,7 +72,6 @@ impl Vec3 {
     }
 }
 
-pub type Color = Vec3;
 pub type Point3 = Vec3;
 
 impl Display for Vec3 {

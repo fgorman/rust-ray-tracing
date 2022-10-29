@@ -3,7 +3,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 pub struct Args {
     /// Name of the output image file
-    #[arg(short, long, default_value_t = format!("out.ppm"))]
+    #[arg(short, long, default_value_t = format!("out.png"))]
     pub out_file: String,
 
     /// Width of the image
