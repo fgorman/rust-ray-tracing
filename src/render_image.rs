@@ -1,6 +1,6 @@
 use std::{io::{self, Write}, thread::{available_parallelism, JoinHandle, self}, sync::{Arc, Mutex}};
 
-use image::{RgbImage, ImageBuffer, Rgb, GenericImage};
+use image::{RgbImage, ImageBuffer, Rgb};
 
 use crate::{
     hittables::{hittable_list::HittableList,sphere::Sphere},
@@ -94,7 +94,7 @@ fn multithreaded_render(out_file: &String, image: &mut RgbImage, world: &Hittabl
         let thread_image_mutex = Arc::clone(&image_mutex);
 
         let thread = thread::spawn(move || {
-            for j in (y_end..y_start).rev() {
+            for j in (y_start..y_end).rev() {
                 for i in x_start..x_end {
                     let mut pixel_color: RgbWrapper = RgbWrapper(Rgb::from([0.0, 0.0, 0.0]));
                     for _ in 0..SAMPLES_PER_PIXEL {
@@ -107,7 +107,10 @@ fn multithreaded_render(out_file: &String, image: &mut RgbImage, world: &Hittabl
                     let pixel_x = (image_width - 1) - i;
                     let pixel_y = (image_height - 1) - j;
 
-                    let mut image_changer = thread_image_mutex.lock().unwrap();
+                    let mut image_changer = match thread_image_mutex.lock() {
+                        Err(ex) => panic!("Error locking mutex for image: {:?}", ex),
+                        Ok(mutex) => mutex,
+                    };
 
                     image_changer.put_pixel(pixel_x, pixel_y, write_color(pixel_color.0, SAMPLES_PER_PIXEL, GAMMA));
                 }
@@ -118,17 +121,14 @@ fn multithreaded_render(out_file: &String, image: &mut RgbImage, world: &Hittabl
         threads.push(thread);
     }
 
-    let image_to_save = image_mutex.lock().unwrap();
+    for thread in threads {
+        thread.join().unwrap();
+    }
 
-    // let mut thread_images: Vec<u8> = Vec::new();
-
-    // for thread in threads {
-        
-    // }
-
-    // println!("{}", thread_images.len());
-
-    // let stitched_image: RgbImage = RgbImage::from_vec(image_width, image_height, thread_images).unwrap();
+    let image_to_save = match image_mutex.lock() {
+        Err(ex) => panic!("Error getting image lock: {:?}", ex),
+        Ok(image_lock) => image_lock,
+    };
 
     match image_to_save.save(&out_file) {
         Err(ex) => panic!("Error with saving image: {}", ex),
@@ -147,15 +147,17 @@ fn get_num_threads() -> u32 {
 fn determine_thread_chunks(num_threads: u32, image_width: u32, image_height: u32) -> Vec<(u32, u32, u32, u32)> {
     let mut chunks: Vec<(u32, u32, u32, u32)> = Vec::new();
 
-    let x_steps = image_width / num_threads;
-    let y_steps = image_height / num_threads;
+    let x_steps = (image_width as f64 / num_threads as f64).ceil() as u32;
+    let y_steps = (image_height as f64 / num_threads as f64).ceil() as u32;
 
-    for i in 0..num_threads {
-        let x_start = i * x_steps;
-        let x_end = if x_start + x_steps > image_width { image_width } else { x_start + x_steps };
-        let y_start = (image_height - (i * y_steps)) - 1;
-        let y_end = if y_start - y_steps <= 0 { 0 } else { y_start - y_steps - 1 };
-        chunks.push((x_start, x_end, y_start, y_end));
+    for j in (0..image_height).step_by(y_steps as usize) {
+        let y_start = j;
+        let y_end = if j + y_steps > image_height { image_height } else { j + y_steps };
+        for i in (0..image_width).step_by(x_steps as usize) {
+            let x_start = i;
+            let x_end = if i + x_steps > image_width { image_width } else { i + x_steps };
+            chunks.push((x_start, x_end, y_start, y_end));
+        }
     }
 
     chunks
