@@ -81,7 +81,7 @@ fn multithreaded_render(out_file: &String, image: &mut RgbImage, world: &Hittabl
 
     let image_mutex = Arc::new(Mutex::new(local_image));
 
-    for thread_num in 0..num_threads {
+    for thread_num in 0..thread_chunks.len() {
         let chunk = thread_chunks.get(thread_num as usize).unwrap();
         let x_start = chunk.0;
         let x_end = chunk.1;
