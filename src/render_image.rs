@@ -81,7 +81,7 @@ fn multithreaded_render(out_file: &String, image: &mut RgbImage, world: &Hittabl
 
     let image_mutex = Arc::new(Mutex::new(local_image));
 
-    for thread_num in 0..thread_chunks.len() {
+    for thread_num in 0..num_threads {
         let chunk = thread_chunks.get(thread_num as usize).unwrap();
         let x_start = chunk.0;
         let x_end = chunk.1;
@@ -147,8 +147,10 @@ fn get_num_threads() -> u32 {
 fn determine_thread_chunks(num_threads: u32, image_width: u32, image_height: u32) -> Vec<(u32, u32, u32, u32)> {
     let mut chunks: Vec<(u32, u32, u32, u32)> = Vec::new();
 
-    let x_steps = (image_width as f64 / num_threads as f64).ceil() as u32;
-    let y_steps = (image_height as f64 / num_threads as f64).ceil() as u32;
+    let num_threads_x = determine_num_threads_x(num_threads);
+    let num_threads_y = num_threads / num_threads_x;
+    let x_steps = (image_width as f64 / num_threads_x as f64).ceil() as u32;
+    let y_steps = (image_height as f64 / num_threads_y as f64).ceil() as u32;
 
     for j in (0..image_height).step_by(y_steps as usize) {
         let y_start = j;
@@ -161,4 +163,16 @@ fn determine_thread_chunks(num_threads: u32, image_width: u32, image_height: u32
     }
 
     chunks
+}
+
+fn determine_num_threads_x(num_threads: u32) -> u32 {
+    let nt_sqrt = (num_threads as f64).sqrt().ceil() as u32;
+
+    for i in (0..nt_sqrt).rev() {
+        if (num_threads as f64 / i as f64).fract() == 0.0 {
+            return i as u32;
+        }
+    }
+
+    panic!("No way to evenly split num threads on x")
 }
