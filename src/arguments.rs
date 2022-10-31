@@ -16,7 +16,11 @@ pub struct Args {
 
     /// Denominator of the aspect ratio
     #[arg(short, long, default_value_t = 9.0)]
-    pub denominator_ar: f64
+    pub denominator_ar: f64,
+
+    /// Run the render multithreaded
+    #[arg(short, long, default_value_t = false)]
+    pub multithread: bool
 }
 
 pub fn parse_command_line_args() -> Args {

@@ -17,5 +17,5 @@ fn main() {
     
     let aspect_ratio: f64 = args.numerator_ar / args.denominator_ar;
 
-    render_image(args.out_file, args.image_width, aspect_ratio)
+    render_image(args.out_file, args.image_width, aspect_ratio, args.multithread)
 }
